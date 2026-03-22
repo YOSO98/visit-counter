@@ -1,0 +1,56 @@
+name: CI — Build & Test
+
+# Déclenché à chaque push sur main, ou pull request
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build-and-test:
+    name: Build Docker image & Test
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # 1. Récupérer le code du repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Construire l'image Docker
+      - name: Build Docker image
+        run: docker build -t visit-counter-web ./app
+
+      # 3. Vérifier que le container démarre correctement
+      - name: Start containers
+        run: docker-compose up -d
+        env:
+          REDIS_HOST: redis
+
+      # 4. Attendre que Flask soit prêt
+      - name: Wait for Flask to be ready
+        run: |
+          echo "Attente du démarrage de Flask..."
+          sleep 5
+
+      # 5. Tester que l'app répond bien sur le port 5001
+      - name: Test HTTP response
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5001)
+          echo "Status HTTP : $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "ERREUR : L'app ne répond pas (status $STATUS)"
+            docker logs flask_app
+            exit 1
+          fi
+          echo "Test réussi : l'app répond 200 OK"
+
+      # 6. Afficher les logs en cas de succès
+      - name: Show container logs
+        run: docker logs flask_app
+
+      # 7. Arrêter les containers
+      - name: Stop containers
+        run: docker-compose down

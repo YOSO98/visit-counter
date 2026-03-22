@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+
+  # --- Application Flask ---
+  web:
+    build: ./app          # Construit l'image depuis le Dockerfile dans ./app
+    container_name: flask_app
+    restart: always
+    ports:
+      - "5001:5000"       # Accessible sur http://localhost:5000
+    environment:
+      REDIS_HOST: redis   # Nom du service Redis ci-dessous
+    depends_on:
+      - redis             # Redis démarre avant Flask
+
+  # --- Base de données Redis ---
+  redis:
+    image: redis:7-alpine  # Image officielle Redis, version légère
+    container_name: redis_db
+    restart: always
+    volumes:
+      - redis_data:/data   # Persistance des données Redis
+
+# --- Volumes persistants ---
+volumes:
+  redis_data:

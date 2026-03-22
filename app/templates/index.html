@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compteur de visites</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 48px 56px;
+      text-align: center;
+      max-width: 480px;
+      width: 90%;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #0ea5e9;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 40px;
+    }
+
+    .counter-box {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 32px;
+    }
+
+    .counter-label {
+      font-size: 13px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .counter-value {
+      font-size: 72px;
+      font-weight: 700;
+      color: #0ea5e9;
+      line-height: 1;
+    }
+
+    .counter-unit {
+      font-size: 14px;
+      color: #64748b;
+      margin-top: 8px;
+    }
+
+    .stack {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      background: #1e3a5f;
+      color: #7dd3fc;
+      border: 1px solid #1d4ed8;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .btn-reset {
+      display: inline-block;
+      background: transparent;
+      color: #64748b;
+      border: 1px solid #334155;
+      font-size: 13px;
+      padding: 8px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-reset:hover {
+      border-color: #64748b;
+      color: #94a3b8;
+    }
+
+    {% if reset %}
+    .counter-value { color: #22c55e; }
+    {% endif %}
+
+    .reset-msg {
+      font-size: 13px;
+      color: #22c55e;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">Projet DevOps</div>
+    <h1>Compteur de visites</h1>
+    <p class="subtitle">Chaque rechargement incrémente le compteur Redis</p>
+
+    <div class="counter-box">
+      <div class="counter-label">Nombre de visites</div>
+      <div class="counter-value">{{ count }}</div>
+      <div class="counter-unit">visites enregistrées</div>
+    </div>
+
+    <div class="stack">
+      <span class="tag">Flask</span>
+      <span class="tag">Redis</span>
+      <span class="tag">Docker</span>
+      <span class="tag">docker-compose</span>
+    </div>
+
+    {% if reset %}
+    <p class="reset-msg">Compteur remis à zéro.</p>
+    {% endif %}
+
+    <a href="/reset" class="btn-reset">Remettre à zéro</a>
+  </div>
+</body>
+</html>
