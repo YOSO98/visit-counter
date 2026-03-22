@@ -1,70 +1,101 @@
-# Compteur de visites — Flask + Redis + Docker + CI/CD
+# 🔢 Compteur de visites
 
-Projet DevOps démontrant la conteneurisation d'une app web et l'automatisation
-via un pipeline CI/CD GitHub Actions.
+![CI](https://github.com/YOSO98/visit-counter/actions/workflows/ci.yml/badge.svg)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-000000?style=flat&logo=flask&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=github-actions&logoColor=white)
+
+Projet DevOps — application web containerisée avec pipeline CI/CD automatisé.
+
+Chaque visite sur la page incrémente un compteur stocké dans Redis.
+Les données sont persistées dans un volume Docker, même après redémarrage.
+
+---
 
 ## Stack technique
 
-| Composant | Technologie |
-|-----------|-------------|
-| Application | Python Flask |
-| Base de données | Redis 7 |
-| Conteneurisation | Docker + Docker Compose |
-| Pipeline CI/CD | GitHub Actions |
+| Composant | Technologie | Rôle |
+|-----------|-------------|------|
+| Application | Python Flask | Serveur web |
+| Base de données | Redis 7 | Stockage du compteur |
+| Conteneurisation | Docker + Docker Compose | Orchestration |
+| CI/CD | GitHub Actions | Build & Test automatisés |
+
+---
 
 ## Architecture
 
 ```
 Navigateur → http://localhost:5001
-                    ↓
-            [Container: flask_app]
-             Flask app (port 5000)
-                    ↓ redis:6379
-            [Container: redis_db]
-             Redis (volume persistant)
+                    │
+                    ▼
+        ┌─────────────────────┐
+        │   flask_app         │
+        │   Python Flask      │
+        │   port 5001 → 5000  │
+        └─────────┬───────────┘
+                  │ redis:6379
+                  ▼
+        ┌─────────────────────┐
+        │   redis_db          │
+        │   Redis 7-alpine    │
+        │   volume: db_data   │
+        └─────────────────────┘
 ```
+
+---
 
 ## Pipeline CI/CD
 
 ```
-git push → GitHub → GitHub Actions
-                          ↓
-                   1. Build image Docker
-                          ↓
-                   2. Start docker-compose
-                          ↓
-                   3. Test HTTP (curl → 200 OK)
-                          ↓
-                   4. docker-compose down
+git push
+    │
+    ▼
+GitHub Actions (ubuntu-latest)
+    │
+    ├── 1. Checkout code
+    ├── 2. Build image Docker
+    ├── 3. docker compose up -d
+    ├── 4. curl http://localhost:5001 → 200 OK ✅
+    ├── 5. docker logs flask_app
+    └── 6. docker compose down
 ```
+
+---
 
 ## Lancer le projet en local
 
 ### Prérequis
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installé
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installé et démarré
 
-### Démarrage
+### Démarrage en une commande
 
 ```bash
-# 1. Cloner le projet
-git clone https://github.com/TON_USERNAME/visit-counter.git
+git clone https://github.com/YOSO98/visit-counter.git
 cd visit-counter
-
-# 2. Lancer les containers
-docker-compose up -d --build
-
-# 3. Ouvrir dans le navigateur
-http://localhost:5001
+docker compose up -d --build
 ```
+
+Ouvre **http://localhost:5001** dans ton navigateur.
 
 ### Commandes utiles
 
 ```bash
-docker ps                  # Voir les containers
-docker logs flask_app      # Logs de l'app
-docker-compose down        # Arrêter
-docker-compose down -v     # Arrêter + supprimer volumes
+# Voir les containers qui tournent
+docker ps
+
+# Voir les logs de l'app Flask
+docker logs flask_app
+
+# Arrêter les containers
+docker compose down
+
+# Arrêter et effacer les données Redis
+docker compose down -v
 ```
+
+---
 
 ## Structure du projet
 
@@ -74,20 +105,29 @@ visit-counter/
 │   └── workflows/
 │       └── ci.yml          # Pipeline GitHub Actions
 ├── app/
-│   ├── app.py              # Application Flask
-│   ├── requirements.txt    # Dépendances Python
-│   ├── Dockerfile          # Image Docker de l'app
+│   ├── app.py              # Application Flask (2 routes)
+│   ├── Dockerfile          # Image Python 3.11-slim optimisée
+│   ├── requirements.txt    # flask + redis
 │   └── templates/
-│       └── index.html      # Page web
+│       └── index.html      # Interface web
 ├── docker-compose.yml      # Orchestration des services
+├── .gitignore
 └── README.md
 ```
 
+---
+
 ## Ce que ce projet démontre
 
-- Dockerfile optimisé (cache des layers)
-- Orchestration multi-conteneurs avec docker-compose
-- Communication inter-containers via réseau Docker
-- Persistance des données avec volume Docker
-- Pipeline CI/CD automatisé avec GitHub Actions
-- Test HTTP automatique à chaque git push
+- **Dockerfile optimisé** : `COPY requirements.txt` avant `COPY . .` pour exploiter le cache des layers Docker
+- **Orchestration multi-conteneurs** : communication entre Flask et Redis via le réseau Docker interne (`redis:6379`)
+- **Persistance des données** : volume Docker `db_data` — les données survivent aux redémarrages
+- **Variables d'environnement** : configuration découplée du code (`REDIS_HOST`)
+- **Pipeline CI/CD** : test HTTP automatique à chaque `git push` sur `main`
+- **Debug réel** : résolution d'un conflit de port et migration `docker-compose` → `docker compose`
+
+---
+
+## Auteur
+
+**YOSO98** — [github.com/YOSO98](https://github.com/YOSO98)
